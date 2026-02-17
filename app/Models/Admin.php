@@ -76,4 +76,18 @@ class Admin extends Authenticatable implements HasAvatar
     {
         return $this->hasMany(ActivityLog::class);
     }
+
+    public function hasPermission(string $moduleCode, string $action): bool
+    {
+        $role = $this->role;
+
+        if (! $role) {
+            return false;
+        }
+
+        return $role->permissions()
+            ->where('action', $action)
+            ->whereHas('module', fn($query) => $query->where('code', $moduleCode))
+            ->exists();
+    }
 }
