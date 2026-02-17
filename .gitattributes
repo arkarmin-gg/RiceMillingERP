@@ -1,8 +1,8 @@
 * text=auto eol=lf
 
-*.blade.php diff=html
-*.css diff=css
-*.html diff=html
+*.blade.php diff=php
+*.css diff=php
+*.html diff=php
 *.md diff=markdown
 *.php diff=php
 
