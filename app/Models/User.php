@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -57,6 +58,23 @@ class User extends Authenticatable
         return [
             'password' => 'hashed',
         ];
+    }
+
+    protected static function booted(): void
+    {
+        static::updating(function (User $user): void {
+            if (! $user->isDirty('profile_image_url')) {
+                return;
+            }
+
+            $oldImage = $user->getOriginal('profile_image_url');
+
+            if (! $oldImage) {
+                return;
+            }
+
+            Storage::disk('s3')->delete($oldImage);
+        });
     }
 
     public function refreshTokens(): HasMany
