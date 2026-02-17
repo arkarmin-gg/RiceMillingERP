@@ -1,14 +1,16 @@
 <?php
 
-namespace App\Filament\Resources\Users\Schemas;
+namespace App\Filament\Resources\Admins\Schemas;
 
 use Filament\Schemas\Schema;
 
-class UserInfolist
+class AdminInfolist
 {
     public static function configure(Schema $schema): Schema
     {
         return $schema
-            ->components([]);
+            ->components([
+                //
+            ]);
     }
 }
