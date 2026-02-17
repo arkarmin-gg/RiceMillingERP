@@ -25,6 +25,7 @@ class AdminPanelProvider extends PanelProvider
     {
         return $panel
             ->default()
+            ->brandName("Rice Milling ERP")
             ->id('admin')
             ->path('admin')
             ->login()
