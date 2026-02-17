@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Filament\Models\Contracts\HasAvatar;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -10,7 +11,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 
-class Admin extends Authenticatable
+class Admin extends Authenticatable implements HasAvatar
 {
     use HasFactory, Notifiable, SoftDeletes, HasUuids;
 
@@ -43,6 +44,24 @@ class Admin extends Authenticatable
         ];
     }
 
+    public function getNameAttribute(): string
+    {
+        if ($this->full_name !== null) {
+            return $this->full_name;
+        }
+
+        if ($this->email !== null) {
+            return $this->email;
+        }
+
+        return '';
+    }
+
+    public function getFilamentAvatarUrl(): ?string
+    {
+        return $this->profile_image_url;
+    }
+
     public function role(): BelongsTo
     {
         return $this->belongsTo(Role::class);
@@ -58,4 +77,3 @@ class Admin extends Authenticatable
         return $this->hasMany(ActivityLog::class);
     }
 }
-

@@ -12,7 +12,9 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware): void {
-        //
+        $middleware->alias([
+            'can.manage.users' => \App\Http\Middleware\EnsureUserCanManageUsers::class,
+        ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         //
