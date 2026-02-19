@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Api\V1\AuthController;
+use App\Http\Controllers\Api\V1\ItemController;
 use App\Http\Controllers\Api\V1\LocationController;
 use App\Http\Controllers\Api\V1\PartyController;
 use App\Http\Controllers\Api\V1\UserController;
@@ -22,6 +23,9 @@ Route::prefix('v1')->group(function () {
         Route::get('locations', [LocationController::class, 'index']);
         Route::get('locations/{id}', [LocationController::class, 'show']);
 
+        Route::get('items', [ItemController::class, 'index']);
+        Route::get('items/{id}', [ItemController::class, 'show']);
+
         Route::middleware('can.manage.users')->group(function () {
             Route::post('users', [UserController::class, 'store']);
             Route::match(['put', 'patch'], 'users/{id}', [UserController::class, 'update']);
@@ -34,6 +38,10 @@ Route::prefix('v1')->group(function () {
             Route::post('locations', [LocationController::class, 'store']);
             Route::match(['put', 'patch'], 'locations/{id}', [LocationController::class, 'update']);
             Route::delete('locations/{id}', [LocationController::class, 'destroy']);
+
+            Route::post('items', [ItemController::class, 'store']);
+            Route::match(['put', 'patch'], 'items/{id}', [ItemController::class, 'update']);
+            Route::delete('items/{id}', [ItemController::class, 'destroy']);
         });
     });
 });
