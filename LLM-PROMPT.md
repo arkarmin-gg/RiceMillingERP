@@ -1,0 +1,2 @@
+- Implement complete, fully-functional CRUD for <YOUR_MODEL_NAME> Model #YOUR_MODEL_NAME.php. Reference to <YOUR_MODEL_NAME_FOR_REFERENCE> Model and <YOUR_MODEL_NAME_FOR_REFERENCE> Model CRUD implementation.
+- Create database migration and model for above table.

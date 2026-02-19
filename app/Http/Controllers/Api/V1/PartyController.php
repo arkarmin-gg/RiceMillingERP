@@ -127,4 +127,3 @@ class PartyController extends Controller
         ]);
     }
 }
-
