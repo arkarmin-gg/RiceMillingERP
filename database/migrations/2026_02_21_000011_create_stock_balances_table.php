@@ -8,14 +8,15 @@ return new class extends Migration
 {
     public function up(): void
     {
-        Schema::create('paddy_receipt_items', function (Blueprint $table) {
-            $table->uuid('id')->primary();
-            $table->uuid('receipt_id');
+        Schema::create('stock_balances', function (Blueprint $table) {
+            $table->uuid('owner_id');
             $table->uuid('item_id');
-            $table->integer('quantity');
             $table->uuid('location_id');
+            $table->decimal('quantity', 14, 2);
 
-            $table->foreign('receipt_id')->references('id')->on('paddy_receipts');
+            $table->primary(['owner_id', 'item_id', 'location_id']);
+
+            $table->foreign('owner_id')->references('id')->on('parties');
             $table->foreign('item_id')->references('id')->on('items');
             $table->foreign('location_id')->references('id')->on('locations');
         });
@@ -23,6 +24,6 @@ return new class extends Migration
 
     public function down(): void
     {
-        Schema::dropIfExists('paddy_receipt_items');
+        Schema::dropIfExists('stock_balances');
     }
 };

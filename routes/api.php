@@ -4,6 +4,7 @@ use App\Http\Controllers\Api\V1\AuthController;
 use App\Http\Controllers\Api\V1\ItemController;
 use App\Http\Controllers\Api\V1\LocationController;
 use App\Http\Controllers\Api\V1\PartyController;
+use App\Http\Controllers\Api\V1\ProductionBatchController;
 use App\Http\Controllers\Api\V1\UserController;
 use Illuminate\Support\Facades\Route;
 
@@ -42,6 +43,12 @@ Route::prefix('v1')->group(function () {
             Route::post('items', [ItemController::class, 'store']);
             Route::match(['put', 'patch'], 'items/{id}', [ItemController::class, 'update']);
             Route::delete('items/{id}', [ItemController::class, 'destroy']);
+
+            // Production batch
+            Route::get('production-batches', [ProductionBatchController::class, 'indexBatchAndOutputs']);
+            Route::get('production-batches/{id}', [ProductionBatchController::class, 'showBatchAndOutputs']);
+            Route::post('production-batches', [ProductionBatchController::class, 'storeBatchAndOutputs']);
+            Route::match(['put', 'patch'], 'production-batches/{id}', [ProductionBatchController::class, 'updateBatchAndOutputs']);
         });
     });
 });

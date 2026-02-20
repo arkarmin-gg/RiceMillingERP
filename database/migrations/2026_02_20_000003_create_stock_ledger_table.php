@@ -21,7 +21,7 @@ return new class extends Migration
             $table->uuid('owner_id');
             $table->uuid('item_id');
             $table->uuid('location_id');
-            $table->decimal('quantity', 12, 2);
+            $table->integer('quantity');
             $table->integer('direction');
             $table->timestamp('created_at')->useCurrent();
 
@@ -36,4 +36,3 @@ return new class extends Migration
         Schema::dropIfExists('stock_ledger');
     }
 };
-
