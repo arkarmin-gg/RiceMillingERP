@@ -31,7 +31,7 @@ class ProductionBatchController extends Controller
         $limit = (int) ($validated['limit'] ?? 10);
 
         $query = ProductionBatch::query()
-            ->with(['outputs.item', 'outputs.location'])
+            ->with(['outputs.item'])
             ->orderByDesc('production_date');
 
         if ($merchantId !== null && $merchantId !== '') {
@@ -71,8 +71,6 @@ class ProductionBatchController extends Controller
                             'quantity' => $output->quantity,
                             'bags' => $bagsData['bags'],
                             'loose_lb' => $bagsData['loose_lb'],
-                            'location_id' => $output->location_id,
-                            'location_name' => $output->location ? $output->location->name : null,
                         ];
                     })->values(),
                 ];
@@ -104,8 +102,6 @@ class ProductionBatchController extends Controller
                         'quantity' => $output->quantity,
                         'bags' => $bagsData['bags'],
                         'loose_lb' => $bagsData['loose_lb'],
-                        'location_id' => $output->location_id,
-                        'location_name' => $output->location ? $output->location->name : null,
                     ];
                 })->values(),
             ];
@@ -125,7 +121,7 @@ class ProductionBatchController extends Controller
     public function showBatchAndOutputs(string $id): JsonResponse
     {
         $batch = ProductionBatch::query()
-            ->with(['outputs.item', 'outputs.location'])
+            ->with(['outputs.item'])
             ->find($id);
 
         if (! $batch) {
@@ -151,8 +147,6 @@ class ProductionBatchController extends Controller
                     'quantity' => $output->quantity,
                     'bags' => $bagsData['bags'],
                     'loose_lb' => $bagsData['loose_lb'],
-                    'location_id' => $output->location_id,
-                    'location_name' => $output->location ? $output->location->name : null,
                 ];
             })->values(),
         ];
@@ -225,10 +219,6 @@ class ProductionBatchController extends Controller
                         'quantity' => $quantityLb,
                     ];
 
-                    if (array_key_exists('location_id', $outputData)) {
-                        $updateData['location_id'] = $outputData['location_id'];
-                    }
-
                     $delta = $quantityLb - $existing->quantity;
 
                     if ($delta !== 0) {
@@ -247,7 +237,7 @@ class ProductionBatchController extends Controller
         });
 
         $batch = ProductionBatch::query()
-            ->with(['outputs.item', 'outputs.location'])
+            ->with(['outputs.item'])
             ->find($id);
 
         $responseData = [
@@ -267,8 +257,6 @@ class ProductionBatchController extends Controller
                     'quantity' => $output->quantity,
                     'bags' => $bagsData['bags'],
                     'loose_lb' => $bagsData['loose_lb'],
-                    'location_id' => $output->location_id,
-                    'location_name' => $output->location ? $output->location->name : null,
                 ];
             })->values(),
         ];
@@ -313,7 +301,6 @@ class ProductionBatchController extends Controller
                     'batch_id' => $batch->id,
                     'item_id' => $outputData['item_id'],
                     'quantity' => $quantityLb,
-                    'location_id' => $outputData['location_id'],
                 ]);
             }
 

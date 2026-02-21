@@ -203,6 +203,7 @@ class DefaultSeeder extends Seeder
                 'full_name' => 'Kaung Kaung',
                 'phone' => '095085730',
                 'user_type' => 'owner',
+                'is_banned' => false,
                 'password' => Hash::make('passwordD123!@#'),
             ]);
         }

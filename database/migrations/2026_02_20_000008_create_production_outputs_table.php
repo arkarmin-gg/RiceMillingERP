@@ -13,11 +13,9 @@ return new class extends Migration
             $table->uuid('batch_id');
             $table->uuid('item_id');
             $table->integer('quantity');
-            $table->uuid('location_id');
 
             $table->foreign('batch_id')->references('id')->on('production_batches');
             $table->foreign('item_id')->references('id')->on('items');
-            $table->foreign('location_id')->references('id')->on('locations');
         });
     }
 

@@ -20,7 +20,6 @@ class ProductionOutput extends Model
         'batch_id',
         'item_id',
         'quantity',
-        'location_id',
     ];
 
     public function batch()
@@ -32,10 +31,4 @@ class ProductionOutput extends Model
     {
         return $this->belongsTo(Item::class);
     }
-
-    public function location()
-    {
-        return $this->belongsTo(Location::class);
-    }
 }
-

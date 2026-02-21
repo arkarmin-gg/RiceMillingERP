@@ -20,8 +20,6 @@ class UpdateProductionBatchAndOutputsRequest extends FormRequest
             'outputs.*.id' => ['required_with:outputs', 'uuid', 'exists:production_outputs,id'],
             'outputs.*.bags' => ['required_with:outputs.*.id', 'integer', 'min:0'],
             'outputs.*.loose_lb' => ['required_with:outputs.*.id', 'integer', 'min:0'],
-            'outputs.*.location_id' => ['sometimes', 'uuid', 'exists:locations,id'],
         ];
     }
 }
-

@@ -21,7 +21,6 @@ class StoreProductionBatchAndOutputsRequest extends FormRequest
             'outputs.*.item_id' => ['required', 'uuid', 'exists:items,id'],
             'outputs.*.bags' => ['required', 'integer', 'min:0'],
             'outputs.*.loose_lb' => ['required', 'integer', 'min:0'],
-            'outputs.*.location_id' => ['required', 'uuid', 'exists:locations,id'],
         ];
     }
 }
