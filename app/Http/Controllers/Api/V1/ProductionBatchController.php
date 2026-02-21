@@ -225,39 +225,17 @@ class ProductionBatchController extends Controller
                         'quantity' => $quantityLb,
                     ];
 
-                    $oldLocationId = $existing->location_id;
-                    $newLocationId = $oldLocationId;
-
                     if (array_key_exists('location_id', $outputData)) {
                         $updateData['location_id'] = $outputData['location_id'];
-                        $newLocationId = $outputData['location_id'];
                     }
 
-                    if ($newLocationId === $oldLocationId) {
-                        $delta = $quantityLb - $existing->quantity;
+                    $delta = $quantityLb - $existing->quantity;
 
-                        if ($delta !== 0) {
-
-                            $this->adjustStockBalance(
-                                $batch->merchant_id,
-                                $existing->item_id,
-                                $newLocationId,
-                                $delta
-                            );
-                        }
-                    } else {
+                    if ($delta !== 0) {
                         $this->adjustStockBalance(
                             $batch->merchant_id,
                             $existing->item_id,
-                            $oldLocationId,
-                            -$existing->quantity
-                        );
-
-                        $this->adjustStockBalance(
-                            $batch->merchant_id,
-                            $existing->item_id,
-                            $newLocationId,
-                            $quantityLb
+                            $delta
                         );
                     }
 
@@ -328,7 +306,6 @@ class ProductionBatchController extends Controller
                 $this->adjustStockBalance(
                     $batch->merchant_id,
                     $outputData['item_id'],
-                    $outputData['location_id'],
                     $quantityLb
                 );
 
@@ -352,13 +329,11 @@ class ProductionBatchController extends Controller
         ], 201);
     }
 
-    private function adjustStockBalance(string $ownerId, string $itemId, string $locationId, int $deltaQuantity): void
+    private function adjustStockBalance(string $ownerId, string $itemId, int $deltaQuantity): void
     {
-
         $balanceQuery = StockBalance::query()
             ->where('owner_id', $ownerId)
-            ->where('item_id', $itemId)
-            ->where('location_id', $locationId);
+            ->where('item_id', $itemId);
 
         $balance = $balanceQuery->lockForUpdate()->first();
 
@@ -366,7 +341,6 @@ class ProductionBatchController extends Controller
             StockBalance::query()->create([
                 'owner_id' => $ownerId,
                 'item_id' => $itemId,
-                'location_id' => $locationId,
                 'quantity' => $deltaQuantity,
             ]);
 

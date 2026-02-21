@@ -6,6 +6,8 @@ use App\Http\Controllers\Api\V1\LocationController;
 use App\Http\Controllers\Api\V1\PartyController;
 use App\Http\Controllers\Api\V1\ProductionBatchController;
 use App\Http\Controllers\Api\V1\UserController;
+use App\Http\Controllers\Api\V1\StockBalanceController;
+use App\Http\Controllers\Api\V1\DispatchController;
 use Illuminate\Support\Facades\Route;
 
 Route::prefix('v1')->group(function () {
@@ -26,6 +28,8 @@ Route::prefix('v1')->group(function () {
 
         Route::get('items', [ItemController::class, 'index']);
         Route::get('items/{id}', [ItemController::class, 'show']);
+
+        Route::get('stock-balances', [StockBalanceController::class, 'index']);
 
         Route::middleware('can.manage.users')->group(function () {
             Route::post('users', [UserController::class, 'store']);
@@ -49,6 +53,12 @@ Route::prefix('v1')->group(function () {
             Route::get('production-batches/{id}', [ProductionBatchController::class, 'showBatchAndOutputs']);
             Route::post('production-batches', [ProductionBatchController::class, 'storeBatchAndOutputs']);
             Route::match(['put', 'patch'], 'production-batches/{id}', [ProductionBatchController::class, 'updateBatchAndOutputs']);
+
+            // Dispatch
+            Route::get('dispatches', [DispatchController::class, 'indexDispatchAndItems']);
+            Route::get('dispatches/{id}', [DispatchController::class, 'showDispatchAndItems']);
+            Route::post('dispatches', [DispatchController::class, 'storeDispatchAndItems']);
+            Route::match(['put', 'patch'], 'dispatches/{id}', [DispatchController::class, 'updateDispatchAndItems']);
         });
     });
 });

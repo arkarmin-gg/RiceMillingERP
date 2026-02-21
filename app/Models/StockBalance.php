@@ -22,7 +22,6 @@ class StockBalance extends Model
     protected $fillable = [
         'owner_id',
         'item_id',
-        'location_id',
         'quantity',
     ];
 
@@ -35,10 +34,4 @@ class StockBalance extends Model
     {
         return $this->belongsTo(Item::class);
     }
-
-    public function location()
-    {
-        return $this->belongsTo(Location::class);
-    }
 }
-
