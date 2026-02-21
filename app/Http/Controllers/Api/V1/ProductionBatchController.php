@@ -8,6 +8,7 @@ use App\Http\Requests\ProductionBatch\StoreProductionBatchAndOutputsRequest;
 use App\Http\Requests\ProductionBatch\UpdateProductionBatchAndOutputsRequest;
 use App\Models\ProductionBatch;
 use App\Models\ProductionOutput;
+use App\Models\StockBalance;
 use App\Support\QuantityConverter;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\DB;
@@ -186,6 +187,8 @@ class ProductionBatchController extends Controller
 
         $outputsPayload = $data['outputs'] ?? null;
 
+        $existingOutputs = null;
+
         if ($outputsPayload !== null) {
             $outputIds = collect($outputsPayload)->pluck('id')->all();
 
@@ -202,13 +205,16 @@ class ProductionBatchController extends Controller
             }
         }
 
-        DB::transaction(function () use ($batch, $batchUpdate, $outputsPayload) {
+        DB::transaction(function () use ($batch, $batchUpdate, $outputsPayload, $existingOutputs) {
             if ($batchUpdate !== []) {
                 $batch->update($batchUpdate);
             }
 
             if ($outputsPayload !== null) {
                 foreach ($outputsPayload as $outputData) {
+
+                    $existing = $existingOutputs[$outputData['id']];
+
                     $quantityLb = QuantityConverter::bagsToPounds(
                         (int) $outputData['bags'],
                         (int) $outputData['loose_lb'],
@@ -219,8 +225,40 @@ class ProductionBatchController extends Controller
                         'quantity' => $quantityLb,
                     ];
 
+                    $oldLocationId = $existing->location_id;
+                    $newLocationId = $oldLocationId;
+
                     if (array_key_exists('location_id', $outputData)) {
                         $updateData['location_id'] = $outputData['location_id'];
+                        $newLocationId = $outputData['location_id'];
+                    }
+
+                    if ($newLocationId === $oldLocationId) {
+                        $delta = $quantityLb - $existing->quantity;
+
+                        if ($delta !== 0) {
+
+                            $this->adjustStockBalance(
+                                $batch->merchant_id,
+                                $existing->item_id,
+                                $newLocationId,
+                                $delta
+                            );
+                        }
+                    } else {
+                        $this->adjustStockBalance(
+                            $batch->merchant_id,
+                            $existing->item_id,
+                            $oldLocationId,
+                            -$existing->quantity
+                        );
+
+                        $this->adjustStockBalance(
+                            $batch->merchant_id,
+                            $existing->item_id,
+                            $newLocationId,
+                            $quantityLb
+                        );
                     }
 
                     ProductionOutput::query()
@@ -287,6 +325,13 @@ class ProductionBatchController extends Controller
                     108
                 );
 
+                $this->adjustStockBalance(
+                    $batch->merchant_id,
+                    $outputData['item_id'],
+                    $outputData['location_id'],
+                    $quantityLb
+                );
+
                 $createdOutputs[] = ProductionOutput::create([
                     'batch_id' => $batch->id,
                     'item_id' => $outputData['item_id'],
@@ -305,5 +350,33 @@ class ProductionBatchController extends Controller
             'data' => $result,
             'message' => 'Production batch and outputs stored successfully',
         ], 201);
+    }
+
+    private function adjustStockBalance(string $ownerId, string $itemId, string $locationId, int $deltaQuantity): void
+    {
+
+        $balanceQuery = StockBalance::query()
+            ->where('owner_id', $ownerId)
+            ->where('item_id', $itemId)
+            ->where('location_id', $locationId);
+
+        $balance = $balanceQuery->lockForUpdate()->first();
+
+        if (! $balance) {
+            StockBalance::query()->create([
+                'owner_id' => $ownerId,
+                'item_id' => $itemId,
+                'location_id' => $locationId,
+                'quantity' => $deltaQuantity,
+            ]);
+
+            return;
+        }
+
+        $newQuantity = $balance->quantity + $deltaQuantity;
+
+        $balanceQuery->update([
+            'quantity' => $newQuantity,
+        ]);
     }
 }

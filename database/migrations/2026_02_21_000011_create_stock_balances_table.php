@@ -12,7 +12,7 @@ return new class extends Migration
             $table->uuid('owner_id');
             $table->uuid('item_id');
             $table->uuid('location_id');
-            $table->decimal('quantity', 14, 2);
+            $table->integer('quantity');
 
             $table->primary(['owner_id', 'item_id', 'location_id']);
 
