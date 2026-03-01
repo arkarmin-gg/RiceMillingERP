@@ -14,6 +14,7 @@ class FilterStockBalanceRequest extends FormRequest
     public function rules(): array
     {
         return [
+            'item_category' => ['nullable', 'string', 'in:PADDY,RICE,BROKEN,POINT_BROKEN,BRAN,POINT_BRAN,HUSK,WASTED'],
             'owner_id' => ['nullable', 'uuid'],
             'item_id' => ['nullable', 'uuid'],
             'page' => ['nullable', 'integer', 'min:1'],

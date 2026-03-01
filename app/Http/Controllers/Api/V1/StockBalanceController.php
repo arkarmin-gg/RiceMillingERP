@@ -19,6 +19,7 @@ class StockBalanceController extends Controller
         $getAll = array_key_exists('get_all', $validated) && $validated['get_all'] !== null
             ? (bool) $validated['get_all']
             : false;
+        $itemCategory = $validated['item_category'] ?? null;
 
         $page = (int) ($validated['page'] ?? 1);
         $limit = (int) ($validated['limit'] ?? 10);
@@ -36,6 +37,12 @@ class StockBalanceController extends Controller
             $query->where('item_id', $itemId);
         }
 
+        if ($itemCategory !== null && $itemCategory !== '') {
+            $query->whereHas('item', function ($q) use ($itemCategory) {
+                $q->where('category', $itemCategory);
+            });
+        }
+
         if ($getAll) {
             $balances = $query->get();
 
@@ -47,6 +54,8 @@ class StockBalanceController extends Controller
                     'owner_name' => $balance->owner ? $balance->owner->full_name : null,
                     'item_id' => $balance->item_id,
                     'item_name' => $balance->item ? $balance->item->name : null,
+                    'item_category' => $balance->item ? $balance->item->category : null,
+                    'unit' => $balance->item ? $balance->item->unit : null,
                     'quantity' => $balance->quantity,
                     'bags' => $bagsData['bags'],
                     'loose_lb' => $bagsData['loose_lb'],
@@ -69,6 +78,8 @@ class StockBalanceController extends Controller
                 'owner_name' => $balance->owner ? $balance->owner->full_name : null,
                 'item_id' => $balance->item_id,
                 'item_name' => $balance->item ? $balance->item->name : null,
+                'item_category' => $balance->item ? $balance->item->category : null,
+                'unit' => $balance->item ? $balance->item->unit : null,
                 'quantity' => $balance->quantity,
                 'bags' => $bagsData['bags'],
                 'loose_lb' => $bagsData['loose_lb'],
