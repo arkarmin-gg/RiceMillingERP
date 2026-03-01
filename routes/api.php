@@ -20,6 +20,7 @@ Route::prefix('v1')->group(function () {
         Route::get('users', [UserController::class, 'index']);
         Route::get('users/{id}', [UserController::class, 'show']);
 
+        Route::get('parties/dispatchable', [PartyController::class, 'getDispatchableParties']);
         Route::get('parties', [PartyController::class, 'index']);
         Route::get('parties/{id}', [PartyController::class, 'show']);
 

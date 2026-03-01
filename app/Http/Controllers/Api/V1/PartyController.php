@@ -7,10 +7,49 @@ use App\Http\Requests\Party\FilterPartyRequest;
 use App\Http\Requests\Party\StorePartyRequest;
 use App\Http\Requests\Party\UpdatePartyRequest;
 use App\Models\Party;
+use App\Models\StockBalance;
+use App\Support\QuantityConverter;
 use Illuminate\Http\JsonResponse;
 
 class PartyController extends Controller
 {
+    public function getDispatchableParties(): JsonResponse
+    {
+        $parties = Party::query()
+            ->whereHas('stockBalances', function ($query) {
+                $query->where('quantity', '>', 0);
+            })
+            ->with(['stockBalances' => function ($query) {
+                $query->where('quantity', '>', 0)->with('item');
+            }])
+            ->get();
+
+        $data = $parties->map(function (Party $party) {
+            return [
+                'id' => $party->id,
+                'full_name' => $party->full_name,
+                'phone' => $party->phone,
+                'type' => $party->type,
+                'dispatchable_items' => $party->stockBalances->map(function (StockBalance $balance) {
+                    $bagsData = QuantityConverter::poundsToBags($balance->quantity, 108);
+
+                    return [
+                        'item_id' => $balance->item_id,
+                        'item_name' => $balance->item ? $balance->item->name : null,
+                        'quantity' => $balance->quantity,
+                        'bags' => $bagsData['bags'],
+                        'loose_lb' => $bagsData['loose_lb'],
+                    ];
+                })->values(),
+            ];
+        });
+
+        return response()->json([
+            'data' => $data,
+            'message' => 'Dispatchable parties retrieved successfully',
+        ]);
+    }
+
     public function index(FilterPartyRequest $request): JsonResponse
     {
         $validated = $request->validated();

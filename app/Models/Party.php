@@ -22,5 +22,10 @@ class Party extends Model
         'address',
         'nrc',
     ];
+
+    public function stockBalances()
+    {
+        return $this->hasMany(StockBalance::class, 'owner_id');
+    }
 }
 
