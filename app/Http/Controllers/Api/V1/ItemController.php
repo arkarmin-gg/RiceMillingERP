@@ -7,10 +7,38 @@ use App\Http\Requests\Item\FilterItemRequest;
 use App\Http\Requests\Item\StoreItemRequest;
 use App\Http\Requests\Item\UpdateItemRequest;
 use App\Models\Item;
+use App\Support\QuantityConverter;
 use Illuminate\Http\JsonResponse;
 
 class ItemController extends Controller
 {
+    public function getItemsWithStock(): JsonResponse
+    {
+        $items = Item::query()
+            ->withSum('stockBalances', 'quantity')
+            ->get();
+
+        $data = $items->map(function (Item $item) {
+            $totalQuantity = $item->stock_balances_sum_quantity ?? 0;
+            $bagsData = QuantityConverter::poundsToBags($totalQuantity, 108);
+
+            return [
+                'id' => $item->id,
+                'name' => $item->name,
+                'category' => $item->category,
+                'unit' => $item->unit,
+                'total_quantity' => $totalQuantity,
+                'total_bags' => $bagsData['bags'],
+                'total_loose_lb' => $bagsData['loose_lb'],
+            ];
+        });
+
+        return response()->json([
+            'data' => $data,
+            'message' => 'Items with stock totals retrieved successfully',
+        ]);
+    }
+
     public function index(FilterItemRequest $request): JsonResponse
     {
         $validated = $request->validated();
@@ -146,4 +174,3 @@ class ItemController extends Controller
         ]);
     }
 }
-

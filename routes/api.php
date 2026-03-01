@@ -27,6 +27,7 @@ Route::prefix('v1')->group(function () {
         Route::get('locations', [LocationController::class, 'index']);
         Route::get('locations/{id}', [LocationController::class, 'show']);
 
+        Route::get('items/with-stock', [ItemController::class, 'getItemsWithStock']);
         Route::get('items', [ItemController::class, 'index']);
         Route::get('items/{id}', [ItemController::class, 'show']);
 

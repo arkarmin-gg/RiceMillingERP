@@ -20,5 +20,10 @@ class Item extends Model
         'category',
         'unit',
     ];
+
+    public function stockBalances()
+    {
+        return $this->hasMany(StockBalance::class);
+    }
 }
 
