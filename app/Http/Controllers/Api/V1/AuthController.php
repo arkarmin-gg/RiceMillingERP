@@ -4,9 +4,11 @@ namespace App\Http\Controllers\Api\V1;
 
 use App\Http\Controllers\Controller;
 use App\Models\User;
+use Carbon\Carbon;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Storage;
 
 class AuthController extends Controller
 {
@@ -63,8 +65,20 @@ class AuthController extends Controller
 
     public function me(Request $request): JsonResponse
     {
+        $user = $request->user();
+
+        $ttl = (int) env('S3_URL_TTL_SECONDS', 3600);
+        $expiresAt = Carbon::now()->addSeconds($ttl);
+
+        if ($user->profile_image_url) {
+            $user->profile_image_url = Storage::disk('s3')->temporaryUrl(
+                $user->profile_image_url,
+                $expiresAt,
+            );
+        }
+
         return response()->json([
-            'data' => $request->user(),
+            'data' => $user,
             'message' => 'User data retrieved successfully',
         ]);
     }

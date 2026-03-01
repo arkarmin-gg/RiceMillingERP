@@ -19,6 +19,7 @@ class DispatchController extends Controller
     {
         $validated = $request->validated();
 
+        $search = $validated['search'] ?? null;
         $merchantId = $validated['merchant_id'] ?? null;
         $fromDate = $validated['from_date'] ?? null;
         $toDate = $validated['to_date'] ?? null;
@@ -32,6 +33,15 @@ class DispatchController extends Controller
         $query = Dispatch::query()
             ->with(['merchant', 'items.item'])
             ->orderByDesc('dispatch_date');
+
+        if ($search !== null && $search !== '') {
+            $query->where(function ($q) use ($search) {
+                $q->where('dispatch_number', 'ILIKE', "%{$search}%")
+                    ->orWhereHas('merchant', function ($mq) use ($search) {
+                        $mq->where('full_name', 'ILIKE', "%{$search}%");
+                    });
+            });
+        }
 
         if ($merchantId !== null && $merchantId !== '') {
             $query->where('merchant_id', $merchantId);
@@ -49,6 +59,9 @@ class DispatchController extends Controller
             $dispatches = $query->get();
 
             $data = $dispatches->map(function (Dispatch $dispatch) {
+                $totalQuantity = $dispatch->items->sum('quantity');
+                $totalBagsData = QuantityConverter::poundsToBags($totalQuantity, 108);
+
                 return [
                     'id' => $dispatch->id,
                     'dispatch_number' => $dispatch->dispatch_number,
@@ -56,6 +69,9 @@ class DispatchController extends Controller
                     'merchant_name' => $dispatch->merchant ? $dispatch->merchant->full_name : null,
                     'dispatch_date' => $dispatch->dispatch_date,
                     'description' => $dispatch->description,
+                    'total_quantity' => $totalQuantity,
+                    'total_bags' => $totalBagsData['bags'],
+                    'total_loose_lb' => $totalBagsData['loose_lb'],
                     'items' => $dispatch->items->map(function (DispatchItem $item) {
                         $bagsData = QuantityConverter::poundsToBags($item->quantity, 108);
 
@@ -81,6 +97,9 @@ class DispatchController extends Controller
         $paginator = $query->paginate($limit, ['*'], 'page', $page);
 
         $data = collect($paginator->items())->map(function (Dispatch $dispatch) {
+            $totalQuantity = $dispatch->items->sum('quantity');
+            $totalBagsData = QuantityConverter::poundsToBags($totalQuantity, 108);
+
             return [
                 'id' => $dispatch->id,
                 'dispatch_number' => $dispatch->dispatch_number,
@@ -88,6 +107,9 @@ class DispatchController extends Controller
                 'merchant_name' => $dispatch->merchant ? $dispatch->merchant->full_name : null,
                 'dispatch_date' => $dispatch->dispatch_date,
                 'description' => $dispatch->description,
+                'total_quantity' => $totalQuantity,
+                'total_bags' => $totalBagsData['bags'],
+                'total_loose_lb' => $totalBagsData['loose_lb'],
                 'items' => $dispatch->items->map(function (DispatchItem $item) {
                     $bagsData = QuantityConverter::poundsToBags($item->quantity, 108);
 
@@ -127,6 +149,9 @@ class DispatchController extends Controller
             ], 404);
         }
 
+        $totalQuantity = $dispatch->items->sum('quantity');
+        $totalBagsData = QuantityConverter::poundsToBags($totalQuantity, 108);
+
         $data = [
             'id' => $dispatch->id,
             'dispatch_number' => $dispatch->dispatch_number,
@@ -134,6 +159,9 @@ class DispatchController extends Controller
             'merchant_name' => $dispatch->merchant ? $dispatch->merchant->full_name : null,
             'dispatch_date' => $dispatch->dispatch_date,
             'description' => $dispatch->description,
+            'total_quantity' => $totalQuantity,
+            'total_bags' => $totalBagsData['bags'],
+            'total_loose_lb' => $totalBagsData['loose_lb'],
             'items' => $dispatch->items->map(function (DispatchItem $item) {
                 $bagsData = QuantityConverter::poundsToBags($item->quantity, 108);
 

@@ -19,6 +19,7 @@ class ProductionBatchController extends Controller
     {
         $validated = $request->validated();
 
+        $search = $validated['search'] ?? null;
         $merchantId = $validated['merchant_id'] ?? null;
         $status = $validated['status'] ?? null;
         $fromDate = $validated['from_date'] ?? null;
@@ -31,8 +32,17 @@ class ProductionBatchController extends Controller
         $limit = (int) ($validated['limit'] ?? 10);
 
         $query = ProductionBatch::query()
-            ->with(['outputs.item'])
+            ->with(['merchant', 'outputs.item'])
             ->orderByDesc('production_date');
+
+        if ($search !== null && $search !== '') {
+            $query->where(function ($q) use ($search) {
+                $q->where('batch_number', 'ILIKE', "%{$search}%")
+                    ->orWhereHas('merchant', function ($mq) use ($search) {
+                        $mq->where('full_name', 'ILIKE', "%{$search}%");
+                    });
+            });
+        }
 
         if ($merchantId !== null && $merchantId !== '') {
             $query->where('merchant_id', $merchantId);
@@ -54,12 +64,19 @@ class ProductionBatchController extends Controller
             $batches = $query->get();
 
             $data = $batches->map(function (ProductionBatch $batch) {
+                $totalQuantity = $batch->outputs->sum('quantity');
+                $totalBagsData = QuantityConverter::poundsToBags($totalQuantity, 108);
+
                 return [
                     'id' => $batch->id,
                     'batch_number' => $batch->batch_number,
                     'merchant_id' => $batch->merchant_id,
+                    'merchant_name' => $batch->merchant ? $batch->merchant->full_name : null,
                     'production_date' => $batch->production_date,
                     'status' => $batch->status,
+                    'total_quantity' => $totalQuantity,
+                    'total_bags' => $totalBagsData['bags'],
+                    'total_loose_lb' => $totalBagsData['loose_lb'],
                     'outputs' => $batch->outputs->map(function (ProductionOutput $output) {
                         $bagsData = QuantityConverter::poundsToBags($output->quantity, 108);
 
@@ -85,12 +102,19 @@ class ProductionBatchController extends Controller
         $paginator = $query->paginate($limit, ['*'], 'page', $page);
 
         $data = collect($paginator->items())->map(function (ProductionBatch $batch) {
+            $totalQuantity = $batch->outputs->sum('quantity');
+            $totalBagsData = QuantityConverter::poundsToBags($totalQuantity, 108);
+
             return [
                 'id' => $batch->id,
                 'batch_number' => $batch->batch_number,
                 'merchant_id' => $batch->merchant_id,
+                'merchant_name' => $batch->merchant ? $batch->merchant->full_name : null,
                 'production_date' => $batch->production_date,
                 'status' => $batch->status,
+                'total_quantity' => $totalQuantity,
+                'total_bags' => $totalBagsData['bags'],
+                'total_loose_lb' => $totalBagsData['loose_lb'],
                 'outputs' => $batch->outputs->map(function (ProductionOutput $output) {
                     $bagsData = QuantityConverter::poundsToBags($output->quantity, 108);
 
@@ -121,7 +145,7 @@ class ProductionBatchController extends Controller
     public function showBatchAndOutputs(string $id): JsonResponse
     {
         $batch = ProductionBatch::query()
-            ->with(['outputs.item'])
+            ->with(['merchant', 'outputs.item'])
             ->find($id);
 
         if (! $batch) {
@@ -130,12 +154,19 @@ class ProductionBatchController extends Controller
             ], 404);
         }
 
+        $totalQuantity = $batch->outputs->sum('quantity');
+        $totalBagsData = QuantityConverter::poundsToBags($totalQuantity, 108);
+
         $data = [
             'id' => $batch->id,
             'batch_number' => $batch->batch_number,
             'merchant_id' => $batch->merchant_id,
+            'merchant_name' => $batch->merchant ? $batch->merchant->full_name : null,
             'production_date' => $batch->production_date,
             'status' => $batch->status,
+            'total_quantity' => $totalQuantity,
+            'total_bags' => $totalBagsData['bags'],
+            'total_loose_lb' => $totalBagsData['loose_lb'],
             'outputs' => $batch->outputs->map(function (ProductionOutput $output) {
                 $bagsData = QuantityConverter::poundsToBags($output->quantity, 108);
 

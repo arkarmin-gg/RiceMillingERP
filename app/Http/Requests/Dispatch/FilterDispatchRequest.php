@@ -14,6 +14,7 @@ class FilterDispatchRequest extends FormRequest
     public function rules(): array
     {
         return [
+            'search' => ['nullable', 'string', 'max:255'],
             'merchant_id' => ['nullable', 'uuid'],
             'from_date' => ['nullable', 'date'],
             'to_date' => ['nullable', 'date'],

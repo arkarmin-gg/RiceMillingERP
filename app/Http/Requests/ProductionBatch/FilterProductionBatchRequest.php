@@ -14,6 +14,7 @@ class FilterProductionBatchRequest extends FormRequest
     public function rules(): array
     {
         return [
+            'search' => ['nullable', 'string', 'max:255'],
             'merchant_id' => ['nullable', 'uuid'],
             'status' => ['nullable', 'string', 'max:50'],
             'from_date' => ['nullable', 'date'],
