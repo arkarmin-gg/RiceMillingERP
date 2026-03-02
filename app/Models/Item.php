@@ -26,4 +26,3 @@ class Item extends Model
         return $this->hasMany(StockBalance::class);
     }
 }
-
