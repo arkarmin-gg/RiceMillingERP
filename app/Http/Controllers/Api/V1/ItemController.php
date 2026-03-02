@@ -143,9 +143,7 @@ class ItemController extends Controller
 
         $data = $request->validated();
 
-        Item::query()
-            ->whereKey($item->getKey())
-            ->update($data);
+        $item->update($data);
 
         $item->refresh();
 
@@ -165,9 +163,7 @@ class ItemController extends Controller
             ], 404);
         }
 
-        Item::query()
-            ->whereKey($item->getKey())
-            ->delete();
+        $item->delete();
 
         return response()->json([
             'message' => "Item with ID '{$id}' has been successfully deleted",

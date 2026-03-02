@@ -16,6 +16,7 @@ class PartyController extends Controller
     public function getDispatchableParties(): JsonResponse
     {
         $parties = Party::query()
+            ->where('type', 'MERCHANT')
             ->whereHas('stockBalances', function ($query) {
                 $query->where('quantity', '>', 0);
             })

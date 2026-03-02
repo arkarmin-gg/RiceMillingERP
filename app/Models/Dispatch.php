@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Traits\LogsActivity;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -9,7 +10,7 @@ use Illuminate\Support\Str;
 
 class Dispatch extends Model
 {
-    use HasFactory, HasUuids;
+    use HasFactory, HasUuids, LogsActivity;
 
     protected $keyType = 'string';
 
@@ -31,6 +32,27 @@ class Dispatch extends Model
     public function items()
     {
         return $this->hasMany(DispatchItem::class, 'dispatch_id');
+    }
+
+    public function getActivityProperties(string $action): array
+    {
+        $this->loadMissing('merchant');
+
+        $properties = [
+            'merchant_name' => $this->merchant ? $this->merchant->full_name : null,
+            'dispatch_number' => $this->dispatch_number,
+        ];
+
+        return $properties;
+    }
+
+    public function getActivityDescription(string $action): string
+    {
+        $description = ucfirst(strtolower($action)) . " Dispatch";
+        if ($this->dispatch_number) {
+            $description .= " ({$this->dispatch_number})";
+        }
+        return $description;
     }
 
     protected static function booted(): void

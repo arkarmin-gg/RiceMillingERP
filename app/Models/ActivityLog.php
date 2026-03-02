@@ -22,6 +22,9 @@ class ActivityLog extends Model
         'admin_id',
         'action',
         'description',
+        'subject_id',
+        'subject_type',
+        'properties',
         'ip_address',
         'user_agent',
         'created_at',
@@ -30,6 +33,7 @@ class ActivityLog extends Model
     protected function casts(): array
     {
         return [
+            'properties' => 'array',
             'created_at' => 'datetime',
         ];
     }
@@ -42,6 +46,11 @@ class ActivityLog extends Model
     public function admin(): BelongsTo
     {
         return $this->belongsTo(Admin::class);
+    }
+
+    public function subject()
+    {
+        return $this->morphTo();
     }
 }
 

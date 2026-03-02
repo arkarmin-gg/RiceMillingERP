@@ -305,9 +305,7 @@ class DispatchController extends Controller
                         );
                     }
 
-                    DispatchItem::query()
-                        ->whereKey($itemData['id'])
-                        ->update($updateData);
+                    $existing->update($updateData);
                 }
             }
         });

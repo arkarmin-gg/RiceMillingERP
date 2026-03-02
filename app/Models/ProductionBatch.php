@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Traits\LogsActivity;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -9,7 +10,7 @@ use Illuminate\Support\Str;
 
 class ProductionBatch extends Model
 {
-    use HasFactory, HasUuids;
+    use HasFactory, HasUuids, LogsActivity;
 
     protected $keyType = 'string';
 
@@ -47,5 +48,14 @@ class ProductionBatch extends Model
     public function outputs()
     {
         return $this->hasMany(ProductionOutput::class, 'batch_id');
+    }
+
+    public function getActivityDescription(string $action): string
+    {
+        $description = ucfirst(strtolower($action)) . " Production Batch";
+        if ($this->batch_number) {
+            $description .= " ({$this->batch_number})";
+        }
+        return $description;
     }
 }

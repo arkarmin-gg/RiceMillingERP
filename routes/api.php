@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Api\V1\ActivityLogController;
 use App\Http\Controllers\Api\V1\AuthController;
 use App\Http\Controllers\Api\V1\ItemController;
 use App\Http\Controllers\Api\V1\LocationController;
@@ -30,6 +31,9 @@ Route::prefix('v1')->group(function () {
         Route::get('items/with-stock', [ItemController::class, 'getItemsWithStock']);
         Route::get('items', [ItemController::class, 'index']);
         Route::get('items/{id}', [ItemController::class, 'show']);
+
+        // Activity Logs
+        Route::get('activity-logs', [ActivityLogController::class, 'index']);
 
         Route::get('stock-balances', [StockBalanceController::class, 'index']);
 

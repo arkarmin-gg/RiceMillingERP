@@ -260,9 +260,7 @@ class ProductionBatchController extends Controller
                         );
                     }
 
-                    ProductionOutput::query()
-                        ->whereKey($outputData['id'])
-                        ->update($updateData);
+                    $existing->update($updateData);
                 }
             }
         });
