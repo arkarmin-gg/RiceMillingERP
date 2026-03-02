@@ -34,6 +34,7 @@ Route::prefix('v1')->group(function () {
 
         // Activity Logs
         Route::get('activity-logs', [ActivityLogController::class, 'index']);
+        Route::get('activity-logs/{id}', [ActivityLogController::class, 'show']);
 
         Route::get('stock-balances', [StockBalanceController::class, 'index']);
 

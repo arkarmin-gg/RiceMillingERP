@@ -63,4 +63,14 @@ class ActivityLogController extends Controller
             'message' => 'Activity logs retrieved successfully',
         ]);
     }
+
+    public function show(string $id): JsonResponse
+    {
+        $log = ActivityLog::with(['user', 'admin'])->findOrFail($id);
+
+        return response()->json([
+            'data' => $log,
+            'message' => 'Activity log retrieved successfully',
+        ]);
+    }
 }
