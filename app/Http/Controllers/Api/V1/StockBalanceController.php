@@ -20,6 +20,7 @@ class StockBalanceController extends Controller
             ? (bool) $validated['get_all']
             : false;
         $itemCategory = $validated['item_category'] ?? null;
+        $search = $validated['search'] ?? null;
 
         $page = (int) ($validated['page'] ?? 1);
         $limit = (int) ($validated['limit'] ?? 10);
@@ -28,6 +29,16 @@ class StockBalanceController extends Controller
             ->with(['owner', 'item'])
             ->orderBy('owner_id')
             ->orderBy('item_id');
+
+        if ($search) {
+            $query->where(function ($q) use ($search) {
+                $q->whereHas('owner', function ($q) use ($search) {
+                    $q->where('full_name', 'like', "%{$search}%");
+                })->orWhereHas('item', function ($q) use ($search) {
+                    $q->where('name', 'like', "%{$search}%");
+                });
+            });
+        }
 
         if ($ownerId !== null && $ownerId !== '') {
             $query->where('owner_id', $ownerId);

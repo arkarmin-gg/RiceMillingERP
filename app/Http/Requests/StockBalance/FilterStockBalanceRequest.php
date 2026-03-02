@@ -16,6 +16,7 @@ class FilterStockBalanceRequest extends FormRequest
         return [
             'item_category' => ['nullable', 'string', 'in:PADDY,RICE,BROKEN,POINT_BROKEN,BRAN,POINT_BRAN,HUSK,WASTED'],
             'owner_id' => ['nullable', 'uuid'],
+            'search' => ['nullable', 'string'],
             'item_id' => ['nullable', 'uuid'],
             'page' => ['nullable', 'integer', 'min:1'],
             'limit' => ['nullable', 'integer', 'min:1', 'max:100'],
