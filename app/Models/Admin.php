@@ -2,7 +2,9 @@
 
 namespace App\Models;
 
+use Filament\Models\Contracts\FilamentUser;
 use Filament\Models\Contracts\HasAvatar;
+use Filament\Panel;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -11,9 +13,15 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 
-class Admin extends Authenticatable implements HasAvatar
+class Admin extends Authenticatable implements HasAvatar, FilamentUser
 {
     use HasFactory, Notifiable, SoftDeletes, HasUuids;
+
+    public function canAccessPanel(Panel $panel): bool
+    {
+        return true;
+    }
+
 
     protected $keyType = 'string';
 
