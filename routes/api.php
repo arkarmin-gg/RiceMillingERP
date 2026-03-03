@@ -9,9 +9,11 @@ use App\Http\Controllers\Api\V1\ProductionBatchController;
 use App\Http\Controllers\Api\V1\UserController;
 use App\Http\Controllers\Api\V1\StockBalanceController;
 use App\Http\Controllers\Api\V1\DispatchController;
+use App\Http\Controllers\Api\V1\HealthCheckController;
 use Illuminate\Support\Facades\Route;
 
 Route::prefix('v1')->group(function () {
+    Route::get('health', [HealthCheckController::class, 'index']);
     Route::post('auth/users/login', [AuthController::class, 'login']);
 
     Route::middleware('auth:sanctum')->group(function () {
