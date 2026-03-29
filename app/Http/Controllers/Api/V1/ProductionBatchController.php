@@ -302,7 +302,7 @@ class ProductionBatchController extends Controller
 
         $batchData = [
             'merchant_id' => $data['merchant_id'],
-            'production_date' => $data['production_date'],
+            'production_date' => $data['production_date'] ?? now(),
             'status' => $data['status'],
         ];
 

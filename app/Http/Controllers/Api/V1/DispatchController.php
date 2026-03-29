@@ -37,6 +37,7 @@ class DispatchController extends Controller
         if ($search !== null && $search !== '') {
             $query->where(function ($q) use ($search) {
                 $q->where('dispatch_number', 'ILIKE', "%{$search}%")
+                    ->orWhere('description', 'ILIKE', "%{$search}%")
                     ->orWhereHas('merchant', function ($mq) use ($search) {
                         $mq->where('full_name', 'ILIKE', "%{$search}%");
                     });
@@ -189,7 +190,7 @@ class DispatchController extends Controller
 
         $dispatchData = [
             'merchant_id' => $data['merchant_id'],
-            'dispatch_date' => $data['dispatch_date'],
+            'dispatch_date' => $data['dispatch_date'] ?? now(),
             'description' => $data['description'] ?? null,
         ];
 
